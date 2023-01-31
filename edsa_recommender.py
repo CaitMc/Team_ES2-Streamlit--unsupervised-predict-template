@@ -57,7 +57,7 @@ load_css("resources/css/style.css")
 # App declaration
 def main():
     
-    page_options = ["Recommender System","Introduction", "Exploratory Data Analysis","Solution Overview"]
+    page_options = ["Recommender System","Introduction", "Exploratory Data Analysis","Solution Overview","Contact Us"]
 
     # DO NOT REMOVE the 'Recommender System' option below, however,
     # you are welcome to add more options to enrich your app.
@@ -224,6 +224,19 @@ def main():
             if see_raw:
                 st.write(dl.load_dataframe('resources/data/ratings.csv', index='userId').head(10))
                 st.write(dl.load_dataframe('resources/data/movies.csv',index='movieId').head(10))
+#################################################################################
+############################## contact us page ##################################
+#################################################################################
+        
+     # Building out the "Contact Us" page
+    if page_selection == "Contact Us":
+        st.image('resources/imgs/team_logo.jpg',use_column_width=True)
+        if page_selection == "Contact Us":
+            with st.form("form1", clear_on_submit=True):
+                name = st.text_input("Enter full name")
+                email = st.text_input("Enter email")
+                message = st.text_area("Message")
 
+                submit = st.form_submit_button("Submit Form")
 if __name__ == '__main__':
     main()
