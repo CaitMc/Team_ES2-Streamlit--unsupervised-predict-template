@@ -31,7 +31,10 @@ import joblib,os
 from PIL import Image
 # Data handling dependencies
 import pandas as pd
+import numpy as np
 
+# Data Visulization
+import matplotlib.pyplot as plt
 
 # Custom Libraries
 from utils import data_loader as dl
@@ -93,25 +96,11 @@ def main():
             if st.button("Recommend"):
                 try:
                     with st.spinner('Crunching the numbers...'):
-                        top_recommendations = content_model(movie_list=fav_movies, top_n=10)
+                        top_recommendations = content_model(movie_list=fav_movies,
+                                                            top_n=10)
                     st.title("We think you'll like:")
-                    for names,posters in enumerate(top_recommendations):
-                        col1, col2, col3, col4, col5 = st.columns(5)
-                        with col1:
-                            st.text(names[0])
-                            st.image(posters[0])
-                        with col2:
-                            st.text(names[1])
-                            st.image(posters[1])
-                        with col3:
-                            st.text(names[2])
-                            st.image(posters[2])
-                        with col4:
-                            st.text(names[3])
-                            st.image(posters[3])
-                        with col5:
-                            st.text(names[4])
-                            st.image(posters[4])
+                    for i,j in enumerate(top_recommendations):
+                        st.subheader(str(i+1)+'. '+j)
                 except:
                     st.error("Oops! Looks like this algorithm does't work.\
                               We'll need to fix it!")
