@@ -77,7 +77,7 @@ def main():
         # Header contents
         st.write('# Movie Recommender Engine')
         st.write('### EXPLORE Data Science Academy Unsupervised Predict')
-        st.image('resources/imgs/image_header.png',use_column_width=True)
+        st.image('resources/imgs/image_header.png')
         # Recommender System algorithm selection
         sys = st.radio("Select an algorithm",
                        ('Content Based Filtering',
