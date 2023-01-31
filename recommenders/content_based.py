@@ -38,9 +38,6 @@ from utils import fetch_poster as fp
 movies = pd.read_csv('resources/data/movies.csv',sep = ',')
 ratings = pd.read_csv('resources/data/ratings.csv')
 movies.dropna(inplace=True)
-df_links2 = pd.read_csv('resources/data/Links2.csv')
-df_links2 = df_links2.drop(['imdbId','tmdbId'],axis=1)
-movies = pd.merge(movies,df_links2, on = 'movieId')
 
 
 def data_preprocessing(subset_size):
@@ -111,12 +108,10 @@ def content_model(movie_list,top_n=10):
 
     # Store movie names
     recommended_movies = []
-    recommended_movies_posters = []
     # Appending the names of movies
     top_50_indexes = list(listings.iloc[1:50].index)
     # Removing chosen movies
     top_indexes = np.setdiff1d(top_50_indexes,[idx_1,idx_2,idx_3])
     for i in top_indexes[:top_n]:
         recommended_movies.append(list(movies['title'])[i])
-        recommended_movies_posters.append(list(movies["images"])[i])
-    return recommended_movies,recommended_movies_posters
+    return recommended_movies
