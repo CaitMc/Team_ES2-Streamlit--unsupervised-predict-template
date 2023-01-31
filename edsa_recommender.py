@@ -29,7 +29,6 @@
 import streamlit as st
 import joblib,os
 from PIL import Image
-from streamlit_option_menu import option_menu
 # Data handling dependencies
 import pandas as pd
 import numpy as np
