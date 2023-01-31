@@ -27,7 +27,9 @@
 """
 # Streamlit dependencies
 import streamlit as st
-
+import joblib,os
+from PIL import Image
+from streamlit_option_menu import option_menu
 # Data handling dependencies
 import pandas as pd
 import numpy as np
@@ -44,8 +46,6 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 import warnings
 warnings.simplefilter(action='ignore')
 
-path_to_s3 = ('https://media.githubusercontent.com/media/LPTsilo/Team_ES2_Unsupervised_Predict/main/')
-
 # Data Loading
 
 
@@ -57,10 +57,12 @@ load_css("resources/css/style.css")
 
 # App declaration
 def main():
+    
+    page_options = ["Recommender System","Introduction", "Exploratory Data Analysis","Solution Overview"]
 
     # DO NOT REMOVE the 'Recommender System' option below, however,
     # you are welcome to add more options to enrich your app.
-    page_options = ["Introduction", "Exploratory Data Analysis", "Recommender System", "Solution Overview"]
+    #page_options = ["Recommender System", "Introduction", "Exploratory Data Analysis", "Solution Overview"]
 
 ################################################################################
 ################################ MODEL #########################################
@@ -69,13 +71,14 @@ def main():
     # -------------------------------------------------------------------
     # ----------- !! THIS CODE MUST NOT BE ALTERED !! -------------------
     # -------------------------------------------------------------------
+    #page_selection = st.sidebar.selectbox("Select Page", page_options)
     page_selection = st.sidebar.selectbox("Select Page", page_options)
     if page_selection == "Recommender System":
-        title_list = dl.load_movie_titles('https://media.githubusercontent.com/media/LPTsilo/Team_ES2_Unsupervised_Predict/main/movies.csv')
+        title_list = dl.load_movie_titles('resources/data/movies.csv')
         # Header contents
         st.write('# Movie Recommender Engine')
         st.write('### EXPLORE Data Science Academy Unsupervised Predict')
-        st.image('resources/imgs/Image_header.png',use_column_width=True)
+        st.image('resources/imgs/image_header.png',use_column_width=True)
         # Recommender System algorithm selection
         sys = st.radio("Select an algorithm",
                        ('Content Based Filtering',
@@ -134,107 +137,65 @@ def main():
 
     # ------------- EDA -------------------------------------------
     if page_selection == "Exploratory Data Analysis":
-        page_options_eda = ["User Interactions", "Movies", "Genres", "Directors"]
+        page_options_eda = ["User Interactions", "Movies", "Genres",]
         page_selection_eda = st.selectbox("Select Feature", page_options_eda)
         if page_selection_eda == "User Interactions":
             st.sidebar.markdown(open('resources/markdown/eda/userint.md').read(), unsafe_allow_html=True)
 
         # Most Active
             st.subheader("Most Active Users")
-            df_train = dl.load_dataframe('https://media.githubusercontent.com/media/LPTsilo/Team_ES2_Unsupervised_Predict/main/train.csv', index=None)
             top_user = st.checkbox('Include top user',value=False)
 
             ## include top user
             if top_user == True:
-                ratings = df_train
+                image1 = Image.open("resources/imgs/rating_graph_user72315 (1).png")
+                st.image(image1)
+                
             else:
-                ratings = df_train[df_train['userId']!=72315]
-
-            ## choose top k(select number of users rated)
-            n = st.number_input('Select number of users (1-50)',min_value=5, max_value=50, step = 5, value=10)
-            ratings_plot = eda.user_ratings_count(ratings, n)
-            if n>=10:
-                plt.xticks(rotation=45)
-            plt.tight_layout()
-            st.pyplot()
+                image2 = Image.open('resources/imgs/rating_graph_no_user72315.png')
+                st.image(image2)
 
             st.write("User 72315 has rated an extreme number of movies relative to other users. For EDA purposes, this user can be removed above to make interpretation easier.")
 
         # Ratings Distribution
             st.subheader('Ratings Distribution')
-            eda.number_users_per_rating(ratings)
-            plt.tight_layout()
-            st.pyplot()
+            image3 = Image.open('resources/imgs/Distribution_of_Ratings.png')
+            st.image(image3)
             st.write(open('resources/markdown/eda/ratings_dist.md').read(), unsafe_allow_html=True)
 
         # Rating v number of ratings
             st.subheader('Ratings trends')
-            eda.mean_ratings_scatter(ratings, column ='movieId')
-            plt.title('Mean movie rating by number of ratings received')
-            plt.tight_layout()
-            st.pyplot()
+            image4 = Image.open('resources/imgs/Mean_Ratings_by_Number_of_Ratings.png')
+            st.image(image4)
             st.write('it seems like The more ratings a movie has, the more highly it is likely to be rated. This confirms our intuitive understanding that the more highly rated a movie is, the more likely is that viewers will recommend the movie to each other. In other words, people generally try to avoid maing bad recommendations')
 
         if page_selection_eda == "Movies":
             st.sidebar.markdown(open('resources/markdown/eda/movies.md').read(), unsafe_allow_html=True)
-            counts = st.number_input('Choose min ratings', min_value=0, max_value=15000, value = 10000, step=1000)
-            ns= st.number_input('Choose n movies', min_value=5, max_value=20, value=10,step=5)
             st.subheader('Best and Worst Movies by Genre')
-            eda.plot_ratings(count=counts, n=ns, color='#4D17A0', best=True, method='mean')
-            st.pyplot()
+            image5 = Image.open('resources/imgs/top_15 best_movie_Ratings.png')
+            st.image(image5)            
             st.write('By filtering movies with less than 10000 ratings, we find that the most popular movies are unsurprising titles. The Shawshank Redemption and The Godfather unsurprisingly top the list. What is interesting is that Movies made post 2000 do not feature often. Do users have a preference to Older movies?')
-
-            eda.plot_ratings(count=counts, n=ns, color='#4DA017', best=False, method='mean')
-            #plt.tight_layout()
-            st.pyplot()
+            image6 = Image.open('resources/imgs/top_15_worst_movie_Ratings.png')
+            st.image(image6)
             st.write('Obviously, users did not like Battlefield too much and with 1200 ratings, they really wanted it to be known. It is interesting how many sequels appear in the list')
 
-
-        if page_selection_eda == "Directors":
-            st.sidebar.markdown(open('resources/markdown/eda/directors.md').read(), unsafe_allow_html=True)
-            imdb_df = dl.load_dataframe('resources/data/imdb_data.csv', index=None)
-
-            directors=eda.count_directors(imdb_df)
-
-            nt= st.number_input('Choose n directors', min_value=5, max_value=20, value=10,step=5)
-            st.subheader('Most Common Directors')
-            eda.feature_count(directors.head(nt), 'director')
-            plt.title('Number of movies per director')
-            plt.tight_layout()
-            st.pyplot()
-            st.write('Once again we need to calculate a mean rating for each director in order to determine who is the most popular')
-
-            directors = eda.dir_mean(directors)
-
-            st.subheader('Most popular directors')
-            eda.feat_popularity(directors.head(nt), 'Director')
-            plt.tight_layout()
-            st.pyplot()
-
-            st.write('Immediately, we see some very well known names, Stephen King and Quentin Tarantino are unsurprisingly top of the list. It begs the question, who are the worst rated directors?')
-            st.subheader('Least popular directors')
-            eda.feat_popularity(directors.tail(nt), 'Director')
-            plt.tight_layout()
-            st.pyplot()
-            st.write('It is unfortunate to find Tyler Perry and Akira Toriyama so poorly rated. Tyler Perry is best known for his Madea series of movies. As we saw from the least popular movies, sequels do not perform well and Madea has numerous sequels.')
 
         if page_selection_eda == "Genres":
             st.sidebar.markdown(open('resources/markdown/eda/genres.md').read(), unsafe_allow_html=True)
             st.subheader('Genre Distribution')
-            movies_df = dl.load_dataframe('resources/data/movies.csv', index=None)
-            genres= eda.feature_frequency(movies_df, 'genres')
-
-            eda.feature_count(genres.sort_values(by = 'count', ascending=False), 'genres')
-            st.pyplot()
+            image7 = Image.open('resources/imgs/Number_of_movies_per_genres.png')
+            st.image(image7)
             st.write('Drama is the most frequently occuring genre in the database. Approximately 5000 movies have missing genres. We can use the IMDB and TMDB IDs together with the APIs to fill missing data. Further, IMAX is not a genre but rather a proprietary system for mass-viewings.')
             st.write('The above figure does not tell us anything about the popularity of the genres, lets calculate a mean rating and append it to the Data')
+            movies_df = dl.load_dataframe('resources/data/movies.csv', index=None)
+            genres= eda.feature_frequency(movies_df, 'genres')
             genres['mean_rating']=eda.mean_calc(genres)
             show_data = st.checkbox('Show raw genre data?')
             if show_data:
                 st.write(genres.sort_values('mean_rating', ascending=False))
             st.write('Film-Noir describes Hollywood crime dramas, particularly those that emphasize cynical attitudes and sexual motivations. The 1940s and 1950s are generally regarded as the "classic period" of American film-noir. These movies have the highest ratings but this may be as a result of its niche audence. The same logic can be applied to IMAX movies, as such, we will only include genres with a count of 500 or more.')
-            eda.genre_popularity(genres.sort_values(by='mean_rating'))
-            st.pyplot()
+            image8 = Image.open('resources/imgs/Mean_Rating_Per_Genre.png')
+            st.image(image8)
             st.write('The scores are almost evenly distributed with the exceptions of Documentaries, War, Drama, Musicals, and Romance and Thriller, Action, Sci-Fi, and Horror, which rate higher than average and below average respectively.')
 
 ################################################################################
